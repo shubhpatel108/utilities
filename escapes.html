@@ -1,0 +1,261 @@
+
+<!doctype html public "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1">
+<meta name="Author" content="Brian Gosselin">
+<title>HTML & JavaScript Encoder/Decoder</title>
+
+<link href="..\styles\tutorials.css" rel="stylesheet" type="text/css">
+
+<script language="javascript">
+
+
+var encN=1;
+
+// DECODES AND UNESCAPES ALL TEXT.
+function decodeTxt(s){
+	var s1=unescape(s.substr(0,s.length-1));
+	var t='';
+	for(i=0;i<s1.length;i++)t+=String.fromCharCode(s1.charCodeAt(i)-s.substr(s.length-1,1));
+	return unescape(t);
+}
+
+// ENCODES, IN UNICODE FORMAT, ALL TEXT AND THEN ESCAPES THE OUTPUT
+function encodeTxt(s){
+	s=escape(s);
+	var ta=new Array();
+	for(i=0;i<s.length;i++)ta[i]=s.charCodeAt(i)+encN;
+	return ""+escape(eval("String.fromCharCode("+ta+")"))+encN;
+}
+
+
+// CONVERTS *ALL* CHARACTERS INTO ESCAPED VERSIONS.
+function escapeTxt(os){
+	var ns='';
+	var t;
+	var chr='';
+	var cc='';
+	var tn='';
+	for(i=0;i<256;i++){
+		tn=i.toString(16);
+		if(tn.length<2)tn="0"+tn;
+		cc+=tn;
+		chr+=unescape('%'+tn);
+	}
+	cc=cc.toUpperCase();
+	os.replace(String.fromCharCode(13)+'',"%13");
+	for(q=0;q<os.length;q++){
+		t=os.substr(q,1);
+		for(i=0;i<chr.length;i++){
+			if(t==chr.substr(i,1)){
+				t=t.replace(chr.substr(i,1),"%"+cc.substr(i*2,2));
+				i=chr.length;
+			}
+		}
+	ns+=t;
+	}
+	return ns;
+}
+
+
+// SIMPLY UNESCAPES TEXT (ONLY INCLUDED TO MAKE A COMPLEMENTARY FUNCTION FOR escapeTxt()
+function unescapeTxt(s){
+	return unescape(s);
+}
+
+// WRITES THE DECODED STRING (s) TO THE DOCUMENT WHEREVER THIS FUNCTION IS CALLED
+function wF(s){
+	document.write(decodeTxt(s));
+}
+
+</script>
+
+</head>
+<body>
+
+<div class="bodycontent">
+<center><h2>HTML/text/JavaSript Escaping/Encoding Script</h2></center><br />
+
+These scripts are intended to explain how to &quot;hide&quot; HTML and/or javascript from other people who view your page's source code. It is not foolproof, but it does make it more difficult to read and understand the source code. Due to the nature of how these scripts work, the explanation may seem complicated and drawn out, but be patient and it should make sense once you gain a little experience with them. You don't really <i>have</i> to know the ins-and-outs of these scripts, but it does help you understand how and why they work. So, take a seat and I'll do my best to make this seem as un-complicated as possible.<br /><br />
+
+By the way, my stolen "popup" script at <span class="code">popovergenerator.com</span> uses a similar method of doing this to hide their thievery. Check out <a href="theft.html">this</a> page for proof...<br /><br />
+<hr>
+
+<h3>Escape/Unescape</h3>
+The first section of this page explains how to &quot;escape&quot; any text, HTML, or Javascript to make it generally unreadable to the common user. URL Escape Codes are two-character Hexadecimal (8-bit) values preceeded by a % sign. This is used primarily in browser URLs or for use when making cookies for characters that otherwise would not work, usually because they are reserved characters (like spaces and the like).<br /><br />
+For example, if you had an HTML filename of <span class="code">page one</span>, the escaped URL code would look like <span class="code">page%20one</span>. The <span class="code">%20</span> is the escaped value for a space. Normally, you would only escape special characters (generally any character other than a-z, A-Z, and 0-9), but the script below actually escapes <i>all</i> the text simply by replacing all characters with their escaped equivalents. So, if you were to <b>fully</b> escape the words <span class="code">page one</span>, it would look like: <span class="code">%70%61%67%65%20%6F%6E%65</span>. Now, none of the text is easily decipherable even though most of it was made up of normal characters.<br /><br />
+Since the browser can inherently handle escape codes, this can be used pretty easily without having to add any more script to decipher them. So, if you want the browser to write that escaped text to the page, you could do something like:<br /><br />
+<div class="code" style="border:1px solid #AAAAAA">
+&lt;script language=&quot;javascript&quot;&gt;<br />
+<div class="highlight">document.write( unescape( '%70%61%67%65%20%6F%6E%65' ) );</div>
+&lt;/script&gt;
+</div><br />
+All I'm doing here is putting the escaped string in a set of quotes (important!), wrapping that inside the built-in <span class="code">unescape()</span> method, and then wrapping that in a <span class="code">document.write()</span> method. This might seem a little worthless, but you could hide an email address this way to prevent web crawlers from snagging your e-mail address from your webpage to use in mass spam e-mailings, yet allowing visitors to read it fine... Unless, of course, you actually <i>like</i> getting Viagra solicitations. :)<br />
+For instance, my fully escaped e-mail address would look like this to a web crawler:<br /><br />
+
+<div class="code" style="border:1px solid #AAAAAA">
+&lt;script language=&quot;javascript&quot;&gt;<br />
+<div class="highlight">document.write( unescape( '%73%63%72%69%70%74%61%73%79%6C%75%6D%40%68%6F%74%6D%61%69%6C%2E%63%6F%6D' ) );</div>
+&lt;/script&gt;
+</div><br />
+
+... but would look like this to a visitor:<br /><br />
+<span class="code">scriptasylum@hotmail.com</span><br /><br />
+
+The two textboxes below will let you fully escape and unescape any text you want. Just type whatever text/HTML/JavaScript you want in the left box and click the <span class="codeB">--&gt;</span> button to fully escape it. Likewise, click the <span class="codeB">&lt;--</span> button to convert it back to normal text to verify that it is the same as the original. You can copy & paste the escaped code into your page (don't forget to use the <span class="code">unescape()</span> and <span class="code">document.write()</span> methods).<br /><br />
+
+
+<center>
+<form name="fA">
+<table cellpadding="5" cellspacing=0 border=0>
+	<tr align="center" valign="top">
+		<td class="tblc">
+			Normal Text/HTML/JavaScript &nbsp; (<a href="javascript:document.forms['fA'].f1.focus();document.forms['fA'].f1.select();">Select all...</a>)
+			<br /><br />
+			<textarea id="f1" cols=40 rows=10 wrap="off">
+<script language="javascript">
+</script>
+			</textarea>
+		</td>
+		<td>
+			<br /><br /><br /><br />
+			<input class="inpB" type="button" value="  -->  " onclick="document.fA.c1.value=escapeTxt(document.fA.f1.value)"><br /><br />
+			<input class="inpB" type="button" value="  <--  " onclick="document.fA.f1.value=unescapeTxt(document.fA.c1.value)">
+		</td>
+		<td class="tblc">
+			Escaped Text/HTML/JavaScript &nbsp; (<a href="javascript:document.forms['fA'].c1.focus();document.forms['fA'].c1.select();">Select all...</a>)
+			<br /><br />
+			<textarea id="c1" cols=40 rows=10>
+			</textarea>
+		</td>
+	</tr>
+</table>
+
+</form>
+</center>
+
+
+<hr><br />
+
+<h3>Encoding/Decoding</h3>
+
+Now, you probably have figured out that you <i>could</i> hide an entire HTML page using the above method; but there are two disadvantages to doing that: Size and ease of &quot;cracking&quot; your code.<br /><br />
+When you fully escape an entire page, every single character becomes 3 characters. This will triple the size of your page. Not a big deal if the page is only about 1-5 KBytes in size; but when you have a fairly large page (>10 KBytes), the filesize increases rapidly. This would slow the load time for the dial-up connection surfers out there.<br /><br />
+Also, if someone were to look at your source code, it would be pretty easy to figure out what you are doing. Then they can simply copy & paste the code and make a small script to display the normal content. There is no absolute foolproof way (client-side) to foil someone from viewing your source if they are determined enough; the best you can hope for is to make it as inconvenient as possible.<br /><br />
+So, to address both concerns you could encode/decode the text. Again, it won't be foolproof to keep people from stealing your source content if they really want it. I am really using the terms &quot;encode&quot; and &quot;decode&quot; loosely here; what the following script does is not considered actual encoding, but it's easier to say it that way. The encoded output will be a bit longer than the original text, but a lot less than if you had simply escaped it all.<br /><br />
+The above section just escapes the text. The section below actually <i>shifts</i> the Unicode values so the result looks like gibberish. Give it a try and you'll see; don't forget to try different <span class="code">Code Key</span> values from the drop-down box.<center>
+<br /><br />
+
+<form name="fB">
+<table cellpadding="5" cellspacing=0 border=0>
+	<tr valign="top" align="center">
+		<td>
+			Normal Text/HTML/JavaScript &nbsp; (<a href="javascript:document.forms['fB'].f2.focus();document.forms['fB'].f2.select();">Select all...</a>)
+			<br /><br />
+			<textarea id="f2" cols=40 rows=10 wrap="off">
+<script language="javascript">
+</script>
+			</textarea>
+		</td>
+		<td>
+			<br /><br />
+			<input class="inpB" type="button" value="  -->  " onclick="document.fB.c2.value=encodeTxt(document.fB.f2.value)"><br /><br />
+			<input class="inpB" type="button" value="  <--  " onclick="document.fB.f2.value=decodeTxt(document.fB.c2.value)"><br /><br />
+			Code Key:<br />
+			<select name="et" onchange="encN=this.selectedIndex+1" class="inpS">
+				<option selected> 1 </option>
+				<option> 2 </option>
+				<option> 3 </option>
+				<option> 4 </option>
+				<option> 5 </option>
+				</select>
+		</td>
+		<td>
+			Encoded Text/HTML/JavaScript &nbsp; (<a href="javascript:document.forms['fB'].c2.focus();document.forms['fB'].c2.select();">Select all...</a>)
+			<br /><br />
+			<textarea id="c2" cols=40 rows=10>
+			</textarea>
+		</td>
+	</tr>
+</table>
+</form>
+
+</center>
+<br />
+The following steps are what the script does to accomplish this effect when you click the <span class="codeB">--></span> (encode) button:
+<ol>
+<li>First, all the text is escaped.
+<li>Then the script finds the Unicode values for each character in the string.
+<li>Then the script adds whatever the <span class="code">Code Key</span> drop-down box value is to each character's Unicode value.
+<li>Then the script derives characters based on the shifted Unicode values.
+<li>The <span class="code">Code Key</span> value is also embedded in the decoded text so the script knows how to properly decode the string again.
+<li>Finally, it escapes the result one more time to remove any special characters. Now, the output looks totally foreign to someone who cannot <i>un-shift</i> Unicode values in their head. :)
+</ol>
+The decode step <span class="codeB"><--</span> simply reverses the process.<br /><br />
+
+Unfortunately, the browser does not have any built-in ability to handle the decoding, so we have to use a function for that. So, you have to <i>escape</i> the function that handles the decoding to hide that part, and have the browser write it to the document. You don't really <i>have</i> to escape the decoding function, but it will make it that much harder for someone to figure out what's going on. Then, the decoding function can be used to decode the rest of whatever content you have encoded. I'll outline the steps below one-by-one to make this less confusing.
+
+<ol>
+
+<li>Escape the decoding function. Before this function is escaped, it looks like this:<br /><br />
+<div class="code" style="border:1px solid #AAAAAA">
+&lt;script language=&quot;javascript&quot;&gt;<br />
+function dF(s){<br />
+var s1=unescape(s.substr(0,s.length-1)); var t='';<br />
+for(i=0;i&lt;s1.length;i++)t+=String.fromCharCode(s1.charCodeAt(i)-s.substr(s.length-1,1));<br />
+document.write(unescape(t));<br />
+}<br />
+&lt;/script&gt;</div><br />
+Once escaped, the function looks like this:<br /><br />
+<div class="code" style="border:1px solid #AAAAAA">%3C%73%63%72%69%70%74%20%6C%61%6E%67%75%61%67%65%3D%22%6A%61%76%61%73%63%72%69%70%74%22%3E%0D%0A%66%75%6E%63%74%69%6F%6E%20%64%46%28%73%29%7B%0D%0A%76%61%72%20%73%31%3D%75%6E%65%73%63%61%70%65%28%73%2E%73%75%62%73%74%72%28%30%2C%73%2E%6C%65%6E%67%74%68%2D%31%29%29%3B%20%76%61%72%20%74%3D%27%27%3B%0D%0A%66%6F%72%28%69%3D%30%3B%69%3C%73%31%2E%6C%65%6E%67%74%68%3B%69%2B%2B%29%74%2B%3D%53%74%72%69%6E%67%2E%66%72%6F%6D%43%68%61%72%43%6F%64%65%28%73%31%2E%63%68%61%72%43%6F%64%65%41%74%28%69%29%2D%73%2E%73%75%62%73%74%72%28%73%2E%6C%65%6E%67%74%68%2D%31%2C%31%29%29%3B%0D%0A%64%6F%63%75%6D%65%6E%74%2E%77%72%69%74%65%28%75%6E%65%73%63%61%70%65%28%74%29%29%3B%0D%0A%7D%0D%0A%3C%2F%73%63%72%69%70%74%3E</div><br />
+Neat huh? :)<br />
+Anyway, now you have to make the browser write that part of the script to the page by wrapping it in the <span class="code">document.write()</span> and <span class="code">unescape()</span> methods like this:<br /><br />
+<div class="code" style="border:1px solid #AAAAAA">&lt;script language=&quot;javascript&quot;&gt;<br />document.write( unescape( '%3C%73%63%72%69%70%74%20%6C%61%6E%67%75%61%67%65%3D%22%6A%61%76%61%73%63%72%69%70%74%22%3E%0D%0A%66%75%6E%63%74%69%6F%6E%20%64%46%28%73%29%7B%0D%0A%76%61%72%20%73%31%3D%75%6E%65%73%63%61%70%65%28%73%2E%73%75%62%73%74%72%28%30%2C%73%2E%6C%65%6E%67%74%68%2D%31%29%29%3B%20%76%61%72%20%74%3D%27%27%3B%0D%0A%66%6F%72%28%69%3D%30%3B%69%3C%73%31%2E%6C%65%6E%67%74%68%3B%69%2B%2B%29%74%2B%3D%53%74%72%69%6E%67%2E%66%72%6F%6D%43%68%61%72%43%6F%64%65%28%73%31%2E%63%68%61%72%43%6F%64%65%41%74%28%69%29%2D%73%2E%73%75%62%73%74%72%28%73%2E%6C%65%6E%67%74%68%2D%31%2C%31%29%29%3B%0D%0A%64%6F%63%75%6D%65%6E%74%2E%77%72%69%74%65%28%75%6E%65%73%63%61%70%65%28%74%29%29%3B%0D%0A%7D%0D%0A%3C%2F%73%63%72%69%70%74%3E' ))<br />&lt;/script&gt;</div><br />
+
+<li>Now that you have the decoding function on the page, you can call it to decode whatever content you have encoded. Let's say you had a script you wanted to protect; something like an image preloading script like this:<br /><br />
+<div class="code" style="border:1px solid #AAAAAA">
+&lt;script language=&quot;javascript&quot;&gt;<br />
+function preloadImages(){<br />
+var iA=new Array();<br />
+for(i=0;i&lt;arguments.length;i++){<br />
+iA[i]=new Image();<br />
+iA[i].src=arguments[i];<br />
+}}<br /><br />
+preloadImages('img1.gif','img2.gif','img3.gif');<br />
+&lt;/script&gt;<br /></div><br />
+Once the script above is encoded using &quot;code key&quot; number 1, it looks like this:<br /><br />
+<div class="code" style="border:1px solid #AAAAAA">
+%264Dtdsjqu%2631mbohvbhf%264E%2633kbwbtdsjqu%2633%264F%261E%261Bgvodujpo%2631qsfmpbeJnbhft%2639%263%3A%268C%261E%261Bwbs%2631jB%264Eofx%2631Bssbz%2639%263%3A%264C%261E%261Bgps%2639j%264E1%264Cj%264Dbshvnfout/mfohui%264Cj%2C%2C%263%3A%268C%261E%261BjB%266Cj%266E%264Eofx%2631Jnbhf%2639%263%3A%264C%261E%261BjB%266Cj%266E/tsd%264Ebshvnfout%266Cj%266E%264C%261E%261B%268E%268E%261E%261B%261E%261BqsfmpbeJnbhft%2639%2638jnh2/hjg%2638%263D%2638jnh3/hjg%2638%263D%2638jnh4/hjg%2638%263%3A%264C%261E%261B%264D0tdsjqu%264F1
+</div><br />
+Then, you decode the string and write it to the page by calling the <span class="code">dF()</span> function (which was just unescaped and written to the page in the previous step) passing the string above like this:<br /><br />
+<div class="code" style="border:1px solid #AAAAAA">
+dF('%264Dtdsjqu%2631mbohvbhf%264E%2633kbwbtdsjqu%2633%264F%261E%261Bgvodujpo%2631qsfmpbeJnbhft%2639%263%3A%268C%261E%261Bwbs%2631jB%264Eofx%2631Bssbz%2639%263%3A%264C%261E%261Bgps%2639j%264E1%264Cj%264Dbshvnfout/mfohui%264Cj%2C%2C%263%3A%268C%261E%261BjB%266Cj%266E%264Eofx%2631Jnbhf%2639%263%3A%264C%261E%261BjB%266Cj%266E/tsd%264Ebshvnfout%266Cj%266E%264C%261E%261B%268E%268E%261E%261B%261E%261BqsfmpbeJnbhft%2639%2638jnh2/hjg%2638%263D%2638jnh3/hjg%2638%263D%2638jnh4/hjg%2638%263%3A%264C%261E%261B%264D0tdsjqu%264F1');</div>
+
+</ol>
+
+So, to bring all this together, the following is what you would paste into your page:<br /><br />
+<div class="code" style="border:1px solid #AAAAAA">&lt;script language=&quot;javascript&quot;&gt;<br />
+<span style="background-color:#FFFED1">document.write(unescape('%3C%73%63%72%69%70%74%20%6C%61%6E%67%75%61%67%65%3D%22%6A%61%76%61%73%63%72%69%70%74%22%3E%0D%0A%66%75%6E%63%74%69%6F%6E%20%64%46%28%73%29%7B%0D%0A%76%61%72%20%73%31%3D%75%6E%65%73%63%61%70%65%28%73%2E%73%75%62%73%74%72%28%30%2C%73%2E%6C%65%6E%67%74%68%2D%31%29%29%3B%20%76%61%72%20%74%3D%27%27%3B%0D%0A%66%6F%72%28%69%3D%30%3B%69%3C%73%31%2E%6C%65%6E%67%74%68%3B%69%2B%2B%29%74%2B%3D%53%74%72%69%6E%67%2E%66%72%6F%6D%43%68%61%72%43%6F%64%65%28%73%31%2E%63%68%61%72%43%6F%64%65%41%74%28%69%29%2D%73%2E%73%75%62%73%74%72%28%73%2E%6C%65%6E%67%74%68%2D%31%2C%31%29%29%3B%0D%0A%64%6F%63%75%6D%65%6E%74%2E%77%72%69%74%65%28%75%6E%65%73%63%61%70%65%28%74%29%29%3B%0D%0A%7D%0D%0A%3C%2F%73%63%72%69%70%74%3E'));</span><span style="background-color:#D1E3FF">dF('%264Dtdsjqu%2631mbohvbhf%264E%2633kbwbtdsjqu%2633%264F%261E%261Bgvodujpo%2631qsfmpbeJnbhft%2639%263%3A%268C%261E%261Bwbs%2631jB%264Eofx%2631Bssbz%2639%263%3A%264C%261E%261Bgps%2639j%264E1%264Cj%264Dbshvnfout/mfohui%264Cj%2C%2C%263%3A%268C%261E%261BjB%266Cj%266E%264Eofx%2631Jnbhf%2639%263%3A%264C%261E%261BjB%266Cj%266E/tsd%264Ebshvnfout%266Cj%266E%264C%261E%261B%268E%268E%261E%261B%261E%261BqsfmpbeJnbhft%2639%2638jnh2/hjg%2638%263D%2638jnh3/hjg%2638%263D%2638jnh4/hjg%2638%263%3A%264C%261E%261B%264D0tdsjqu%264F1');</span><br />
+&lt;/script&gt;
+</div>
+<br />
+I've highlighted the part that unescapes the decoder function in light yellow, and the part that decodes the preloading script and writes it to the page in light blue. You would just paste the whole section above into your page and the script would function perfectly just like it would if it were plain old English. Yes, it looks confusing, but that's the point isn't it? Oh, and one more thing: the whole string should appear on <b>one line</b>; you can <u>not</u> add forced line breaks.<br /><br />
+
+The same thing is done if you want to encode a whole HTML page, except the encoded part of the string (light blue) could potentially be <b>HUGE</b>. The escaped function (light yellow) would <b>not</b> change however.<br /><br />
+
+I've made a couple of wizards you can use for different purposes. You can achieve the same thing by using the escape/un-escape & encoder/decoder functions above, but these are specialized to take out some of the guesswork. Each of the links below will open a new window.
+<ul>
+<li><a href="javascript_encoder.html" target="_blank">Javascript Encoder</a> - Designed to encode Javascript <b>only</b>. Useful to only encode and install a script in an already created HTML page.
+<li><a href="html_encoder.html" target="_blank">HTML Page Encoder</a> - Designed to encode your whole HTML page. You just enter your HTML sourcecode into one box, select the encoding scheme, and press the "encode" button. The output can be pasted directly into a blank page and saved as an HTML file.
+</ul>
+The method this script uses to shift the Unicode values may be different from other similar encoding scripts you may find elsewhere on the net. My version simply adds the "Code Key" value to the Unicode value. Others may subtract, multiply, divide, square, etc a number to scramble the original text. No matter what, the method is very similar.<br /><br />
+
+You can find a complete chart of all the UniCode values using the MS Windows <span class="code">charmap</span> application.
+
+<br /><br /><br /><br />
+
+<script language="javascript" src="../scripts/cr.js"></script>
+</div>
+</body>
+</html>
