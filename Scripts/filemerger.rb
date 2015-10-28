@@ -1,15 +1,22 @@
+@headers = []
+@flag = true
 
-def merge(filename, rest, mergedFile)
+def merge(filename)
 	contents = File.open(filename);
-	flag = true;
+
+	rest = ""
 
 	contents.lines do |line|
+		if line.start_with?("package")
+			next
+		end
+
 		if line.start_with?("import")
-			mergedFile.puts line
+			@headers << line
 		else
-			if(flag && line.start_with?("public"))
+			if(@flag && line.start_with?("public class"))
 				line.sub!("public ", "")
-				flag = false
+				@flag = false
 			end
 			rest += line
 		end
@@ -20,19 +27,21 @@ end
 
 def start
 	path = "/Users/shubham/Documents/workspace/"
-	srcfolder = "Hackerearth/src/SegmentTree/"
+	srcfolder = "Hackerearth/src/graph/"
 	files = gets.chomp.split(" ")
-	rest = ""
-	mergedFile = File.open("output.java", 'w');
+
+	mergedcontent = ""
 
 	files.each do |file|
-		rest = merge(File.join(path, srcfolder, file), rest, mergedFile)
+		mergedcontent += merge(File.join(path, srcfolder, file))
 	end
 
+	@headers.uniq!
+
+	mergedFile = File.open("output.java", 'w');
+	mergedFile.puts @headers
+	mergedFile.puts mergedcontent
 	mergedFile.close
-	File.open('output.java', 'a') do |f|
-		f.puts rest
-	end
 end
 
 
